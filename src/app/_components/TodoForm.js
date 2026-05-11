@@ -1,30 +1,55 @@
 "use client";
 
 import { addTodo } from "@/api/todos";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function TodoForm() {
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
 
-  const queryClient = useQueryClient();
+  const {
+    mutate: addTodoMutation,
+    isPending: isAdding,
+    isError,
+  } = useMutation({
+    mutationFn: async (title) => {
+      return addTodo(title);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+    onError: () => {
+      alert("실패했습니다.");
+    },
+  });
 
-  const handleAddTodo = async (title) => {
-    try {
-      await addTodo(title);
-      await queryClient.invalidateQueries({ queryKey: ["todos"] });
-    } catch (err) {
-      console.error("할 일 추가 중 오류 발생:", err);
-      setError("할 일을 추가하는데 실패했습니다.");
-    }
-  };
+  // const result = useMutation({
+  //   mutationFn: addTodo,
+  // });
+
+  // console.log("mutation에 들어있는 것 : ", result);
+
+  // const queryClient = useQueryClient();
+
+  // const handleAddTodo = async (title) => {
+  //   try {
+  //     await addTodo(title);
+  //     await queryClient.invalidateQueries({ queryKey: ["todos"] });
+  //   } catch (err) {
+  //     console.error("할 일 추가 중 오류 발생:", err);
+  //     setError("할 일을 추가하는데 실패했습니다.");
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
 
     try {
-      await handleAddTodo(title);
+      // await handleAddTodo(title);
+      // mutation.mutate(title);
+      addTodoMutation(title);
       setTitle(""); // 입력 필드 초기화
     } catch (err) {
       console.error("할 일 추가 중 오류 발생:", err);
@@ -46,7 +71,7 @@ export default function TodoForm() {
           type="submit"
           className="px-4 py-2 bg-blue-500 text-white cursor-pointer"
         >
-          추가
+          {isAdding ? "추가중..." : "추가"}
         </button>
       </div>
     </form>
