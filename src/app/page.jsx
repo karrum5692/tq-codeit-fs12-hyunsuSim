@@ -53,7 +53,7 @@ export default function Home() {
     loadTodos();
   }, []);
 
-  if (!isLoading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">로딩 중...</div>
     );
