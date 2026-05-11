@@ -15,6 +15,9 @@ export default function TodoDetailPage() {
   } = useQuery({
     queryKey: ["todos", id],
     queryFn: () => fetchTodo(id),
+    meta: {
+      name: "todos 상세",
+    },
     gcTime: 10 * 60 * 1000,
   });
 
